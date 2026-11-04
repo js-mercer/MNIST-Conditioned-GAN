@@ -1,0 +1,14 @@
+# Downloaded MNIST data
+data/
+
+# Training outputs and saved weights
+outputs/
+weights/
+
+# Python-generated files
+__pycache__/
+*.py[cod]
+
+# Virtual environments
+.venv/
+venv/
