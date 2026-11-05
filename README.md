@@ -42,7 +42,7 @@ python -m visualisations.class_cycle --seed 4 --frames 20
 ```
 
 The GIF is saved to `outputs/class_cycle/class_cycle.gif` by default. Use
-`--weights` and `--output_dir` to choose different paths.
+`--weights_path` and `--output_dir` to choose different paths.
 
 ## Animate training progress
 
@@ -54,8 +54,7 @@ python -m visualisations.training_progress
 ```
 
 The GIF is saved to `outputs/training_progress.gif` by default. Use
-`--input_dir`, `--output`, or `--duration` to customize the input folder,
-output path, or delay per epoch frame.
+`--input_dir`, `--output_path`, or `--duration` to customize the input folder, output path, or delay per epoch frame.
 
 ## Visualise class-label embeddings
 
@@ -68,6 +67,6 @@ python -m visualisations.class_similarity
 
 By default, the plots are saved under `outputs/class_similarity/`. Open
 `embeddings_pca_3d.html` in a browser and drag to rotate the 3D view. Use
-`--weights` and `--output_dir` to choose different paths.
+`--weights_path` and `--output_dir` to choose different paths.
 
 ## Notes

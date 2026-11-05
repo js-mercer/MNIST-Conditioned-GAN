@@ -5,7 +5,7 @@ from pathlib import Path
 
 from models.generator import Generator
 
-def parse_args():
+def parse_args() -> argparse.Namespace:
     """Defines and parses command line arguments for generating digit and hybrid digit images."""
     project_root = Path(__file__).resolve().parent
     parser = argparse.ArgumentParser(description="Generate a digit (or hybrid digit) image using a trained Conditioned MNIST GAN")
@@ -24,7 +24,7 @@ def parse_args():
         help="Directory to save image",
     )
     parser.add_argument(
-        "--weights",
+        "--weights_path",
         type=Path,
         default=project_root/"weights"/"generator_cgan.pth",
         help="Path to generator weights",
@@ -49,7 +49,7 @@ def generate_digit_image(args):
     # Load the trained generator and class embedding models
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     generator = Generator().to(device)
-    state_dict = torch.load(args.weights, map_location=device)
+    state_dict = torch.load(args.weights_path, map_location=device)
     generator.load_state_dict(state_dict)
     generator.eval()
     # Extract the class embedding weights for latent space interpolation

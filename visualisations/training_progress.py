@@ -2,11 +2,12 @@ import argparse
 import re
 from pathlib import Path
 
-from PIL import Image
+from PIL import Image, ImageDraw
+from networkx import draw
 
 EPOCH_IMAGE_PATTERN = re.compile(r"^epoch_(\d+)\.png$")
 
-def parse_args():
+def parse_args() -> argparse.Namespace:
     """Parse input and output options for the training-progress GIF."""
     project_root = Path(__file__).resolve().parents[1]
     parser = argparse.ArgumentParser(
@@ -19,7 +20,7 @@ def parse_args():
         help="Directory containing epoch_NNN.png training images",
     )
     parser.add_argument(
-        "--output",
+        "--output_path",
         type=Path,
         default=project_root / "outputs" / "training_progress.gif",
         help="Path for the generated GIF",
@@ -41,6 +42,7 @@ def find_epoch_images(input_dir):
     if not input_dir.is_dir():
         raise FileNotFoundError(f"Training image directory does not exist: {input_dir}")
 
+    # Find all epoch_NNN.png images in the input directory and sort them by epoch number
     epoch_images = []
     for path in input_dir.iterdir():
         match = EPOCH_IMAGE_PATTERN.fullmatch(path.name)
@@ -63,8 +65,34 @@ def create_training_gif(input_dir, output_path, duration):
     try:
         for path in image_paths:
             with Image.open(path) as image:
-                frames.append(image.convert("RGB"))
+                # Convert to RGB to ensure consistent color mode for GIF
+                frame = image.convert("RGB")
+                match = EPOCH_IMAGE_PATTERN.fullmatch(path.name)
+                epoch = int(match.group(1))
+                header_height = 50
+                text = f"Epoch {epoch}"
 
+                # Create a new canvas with space for the epoch counter above the image
+                canvas = Image.new(
+                    "RGB", (frame.width, frame.height + header_height), "black"
+                )
+                # Paste the original frame onto the canvas below the header
+                canvas.paste(frame, (0, header_height))
+
+                # Draw the epoch counter text centered in the header area
+                draw = ImageDraw.Draw(canvas)
+                left, top, right, bottom = draw.textbbox((0, 0), text)
+                text_width = right - left
+                text_height = bottom - top
+                x = (canvas.width - text_width) // 2 - left
+                y = (header_height - text_height) // 2 - top
+                draw.text((x, y), text, fill="white")
+
+                frame.close()
+                # Append new frame
+                frames.append(canvas)
+
+        # Ensure all frames have the same dimensions
         frame_size = frames[0].size
         if any(frame.size != frame_size for frame in frames[1:]):
             raise ValueError("All epoch images must have the same dimensions.")
@@ -73,6 +101,7 @@ def create_training_gif(input_dir, output_path, duration):
 
         # Linger on last frame for 1s before looping back
         frame_durations = [duration] * (len(frames) - 1) + [1000]
+        # Save the animated GIF
         frames[0].save(
             output_path,
             save_all=True,
@@ -91,4 +120,4 @@ def create_training_gif(input_dir, output_path, duration):
 
 if __name__ == "__main__":
     args = parse_args()
-    create_training_gif(args.input_dir, args.output, args.duration)
+    create_training_gif(args.input_dir, args.output_path, args.duration)

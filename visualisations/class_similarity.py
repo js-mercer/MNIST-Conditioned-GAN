@@ -10,7 +10,7 @@ from sklearn.decomposition import PCA
 from models.generator import Generator
 
 
-def parse_args():
+def parse_args() -> argparse.Namespace:
     """Parse paths for generating class-embedding visualisations."""
     project_root = Path(__file__).resolve().parents[1]
     parser = argparse.ArgumentParser(
@@ -23,7 +23,7 @@ def parse_args():
         help="Directory for the 2D PNG and interactive 3D HTML",
     )
     parser.add_argument(
-        "--weights",
+        "--weights_path",
         type=Path,
         default=project_root/"weights"/"generator_cgan.pth",
         help="Path to trained generator weights",
@@ -31,7 +31,7 @@ def parse_args():
     return parser.parse_args()
 
 
-def load_class_embeddings(weights_path):
+def load_class_embeddings(weights_path: Path):
     """Load the generator's learned class-label embedding vectors."""
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     generator = Generator().to(device)
@@ -41,11 +41,12 @@ def load_class_embeddings(weights_path):
     return generator.label_embedding.weight.detach().cpu().numpy()
 
 
-def save_2d_plot(embeddings_2d, variance_retained, output_path):
+def save_2d_plot(embeddings_2d, variance_retained, output_path: Path):
     """Save a labeled 2D PCA scatter plot."""
     figure, axis = plt.subplots(figsize=(10, 8))
     colors = plt.cm.tab10(np.linspace(0, 1, 10))
 
+    # Plot each class embedding as a scatter point with its label
     for digit, (x, y) in enumerate(embeddings_2d):
         axis.scatter(
             x,
@@ -78,8 +79,9 @@ def save_2d_plot(embeddings_2d, variance_retained, output_path):
     plt.close(figure)
 
 
-def save_3d_plot(embeddings_3d, variance_retained, output_path):
+def save_3d_plot(embeddings_3d, variance_retained, output_path: Path):
     """Save a standalone, interactive 3D PCA plot as HTML."""
+    # Colours for the 10 classes
     colors = [
         "#636EFA",
         "#EF553B",
@@ -92,6 +94,7 @@ def save_3d_plot(embeddings_3d, variance_retained, output_path):
         "#EB93EB",
         "#FECB52",
     ]
+    # Create a 3D scatter plot with Plotly
     figure = go.Figure(
         data=[
             go.Scatter3d(
@@ -115,6 +118,7 @@ def save_3d_plot(embeddings_3d, variance_retained, output_path):
             )
         ]
     )
+    # Set the layout for the 3D plot with axis labels and title
     figure.update_layout(
         title=(
             "Interactive 3D PCA of learned class-label embeddings "
@@ -129,13 +133,16 @@ def save_3d_plot(embeddings_3d, variance_retained, output_path):
     figure.write_html(output_path, include_plotlyjs=True)
 
 
-def pca_class_similarity(args):
-    embeddings = load_class_embeddings(args.weights)
+def pca_class_similarity(args: argparse.Namespace):
+    # Load the learned class-label embeddings from the trained generator
+    embeddings = load_class_embeddings(args.weights_path)
     pca = PCA(n_components=3)
     embeddings_3d = pca.fit_transform(embeddings)
+    # Calculate the variance retained by each principal component
     variance_by_component = pca.explained_variance_ratio_
 
     args.output_dir.mkdir(parents=True, exist_ok=True)
+    # Save the 2D and 3D PCA visualisations
     plot_2d_path = args.output_dir/"embeddings_pca_2d.png"
     plot_3d_path = args.output_dir/"embeddings_pca_3d.html"
 

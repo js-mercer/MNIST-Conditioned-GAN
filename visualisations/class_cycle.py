@@ -6,7 +6,7 @@ from pathlib import Path
 
 from models.generator import Generator
 
-def parse_args():
+def parse_args() -> argparse.Namespace:
     """Defines and parses command line arguments for generating digit morphing animations."""
     project_root = Path(__file__).resolve().parents[1]
     parser = argparse.ArgumentParser(description="Generate a digit morphing animation using a trained Conditioned MNIST GAN")
@@ -18,14 +18,14 @@ def parse_args():
     # Weight/output paths
     parser.add_argument(
         "--output_dir",
-        type=str,
-        default=str(project_root/"outputs"/"class_cycle"),
+        type=Path,
+        default=project_root / "outputs" / "class_cycle",
         help="Directory to save animation",
     )
     parser.add_argument(
-        "--weights",
-        type=str,
-        default=str(project_root/"weights"/"generator_cgan.pth"),
+        "--weights_path",
+        type=Path,
+        default=project_root / "weights" / "generator_cgan.pth",
         help="Path to generator weights",
     )
 
@@ -34,18 +34,17 @@ def parse_args():
         parser.error("--frames must be at least 2")
     return args
 
-def generate_morphing_animation(args):
+def generate_morphing_animation(args: argparse.Namespace):
     # Set random seed for reproducible style features
     torch.manual_seed(args.seed)
 
     # Ensure output directory exists
-    output_dir = Path(args.output_dir)
-    output_dir.mkdir(parents=True, exist_ok=True)
+    args.output_dir.mkdir(parents=True, exist_ok=True)
 
     # Load the trained generator and class embedding models
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     generator = Generator().to(device)
-    state_dict = torch.load(args.weights, map_location=device)
+    state_dict = torch.load(args.weights_path, map_location=device)
     generator.load_state_dict(state_dict)
     generator.eval()
     # Extract the class embedding weights for latent space interpolation
@@ -100,7 +99,7 @@ def generate_morphing_animation(args):
                 frames.append(pil_img)
 
     # Save and compile into a GIF
-    gif_filename = output_dir / "class_cycle.gif"
+    gif_filename = args.output_dir / "class_cycle.gif"
     if frames:
         frames[0].save(
             gif_filename,

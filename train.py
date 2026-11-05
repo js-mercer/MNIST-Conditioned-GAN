@@ -1,5 +1,6 @@
-import os
 import argparse
+from pathlib import Path
+
 import numpy as np
 import matplotlib.pyplot as plt
 import torch
@@ -11,19 +12,20 @@ from models.discriminator import Discriminator
 from data_loader import get_mnist_loaders 
 
 
-def parse_args():
+def parse_args() -> argparse.Namespace:
     """Defines and parses command line arguments for hyperparameters."""
+    project_root = Path(__file__).resolve().parent
     parser = argparse.ArgumentParser(description="Train a Conditioned MNIST GAN")
     
     # Hyperparameters
-    parser.add_argument("--epochs", type=int, default=100, help="Number of training epochs")
+    parser.add_argument("--epochs", type=int, default=50, help="Number of training epochs")
     parser.add_argument("--batch_size", type=int, default=64, help="Batch size for training")
     parser.add_argument("--lr_d", type=float, default=0.0001, help="Discriminator learning rate")
     parser.add_argument("--lr_g", type=float, default=0.0004, help="Generator learning rate")
     
     # Environment/Output paths
-    parser.add_argument("--output_dir", type=str, default="./outputs", help="Directory to save generated epoch images")
-    parser.add_argument("--weights_dir", type=str, default="./weights", help="Directory to save model weights")
+    parser.add_argument("--output_dir", type=Path, default=project_root / "outputs", help="Directory to save generated epoch images")
+    parser.add_argument("--weights_dir", type=Path, default=project_root / "weights", help="Directory to save model weights")
     
     return parser.parse_args()
 
@@ -33,8 +35,8 @@ def train_gan(args):
     print(f"Using device: {device}")
 
     # Ensure output directories exist
-    os.makedirs(args.output_dir, exist_ok=True)
-    os.makedirs(args.weights_dir, exist_ok=True)
+    args.output_dir.mkdir(parents=True, exist_ok=True)
+    args.weights_dir.mkdir(parents=True, exist_ok=True)
 
     # Initialise networks and shift to device
     generator = Generator().to(device=device)
@@ -120,7 +122,7 @@ def train_gan(args):
             fake_grid = torchvision.utils.make_grid(fake_samples, nrow=10, padding=2, normalize=True)
             
             # Save the image file to the output directory
-            img_save_path = os.path.join(args.output_dir, f"epoch_{epoch+1:03d}.png")
+            img_save_path = args.output_dir / f"epoch_{epoch+1:03d}.png"
             plt.figure(figsize=(6, 6))
             plt.imshow(np.transpose(fake_grid, (1, 2, 0)))
             plt.axis('off')
@@ -128,8 +130,8 @@ def train_gan(args):
             plt.close() 
 
     # Save network weights
-    gen_save_path = os.path.join(args.weights_dir, 'generator_cgan.pth')
-    disc_save_path = os.path.join(args.weights_dir, 'discriminator_cgan.pth')
+    gen_save_path = args.weights_dir / "generator_cgan.pth"
+    disc_save_path = args.weights_dir / "discriminator_cgan.pth"
 
     torch.save(generator.state_dict(), gen_save_path)
     torch.save(discriminator.state_dict(), disc_save_path)
