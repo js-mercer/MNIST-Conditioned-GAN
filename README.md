@@ -33,15 +33,17 @@ Once training has finished these outputs can be compiled into a GIF:
 
 The generator can now be used to generate requested digits in different handwriting styles and "hybrid" digits:
 
-<table>
-  <tr>
-    <td align="center">Style 1<br><img src="example-outputs/generated_digit_4_seed_0.png" width="100" alt="Digit 4, style 1"></td>
-    <td align="center">Style 2<br><img src="example-outputs/generated_digit_4_seed_1.png" width="100" alt="Digit 4, style 2"></td>
-    <td align="center">Style 3<br><img src="example-outputs/generated_digit_4_seed_3.png" width="100" alt="Digit 4, style 3"></td>
-    <td align="center">Style 4<br><img src="example-outputs/generated_digit_4_seed_4.png" width="100" alt="Digit 4, style 4"></td>
-    <td align="center">Blend 4 & 5<br><img src="example-outputs/generated_hybrid_digit_4_5_blend_0.5_seed_4.png" width="100" height="95" alt="Blend 4 and 5"></td>
-  </tr>
-</table>
+<div align="center">
+    <table>
+    <tr>
+        <td align="center">Style 1<br><img src="example-outputs/generated_digit_4_seed_0.png" width="100" alt="Digit 4, style 1"></td>
+        <td align="center">Style 2<br><img src="example-outputs/generated_digit_4_seed_1.png" width="100" alt="Digit 4, style 2"></td>
+        <td align="center">Style 3<br><img src="example-outputs/generated_digit_4_seed_3.png" width="100" alt="Digit 4, style 3"></td>
+        <td align="center">Style 4<br><img src="example-outputs/generated_digit_4_seed_4.png" width="100" alt="Digit 4, style 4"></td>
+        <td align="center">Blend 4 & 5<br><img src="example-outputs/generated_hybrid_digit_4_5_blend_0.5_seed_4.png" width="100" height="110" alt="Blend 4 and 5"></td>
+    </tr>
+    </table>
+</div>
 
 We can use this latent space interpolation to animate a GIF that smoothly transitions digits between classes:
 
@@ -57,11 +59,11 @@ Finally, we can visualise the learned class embeddings using 2d and 3D PCA plots
 
 [Open the interactive 3D PCA plot](https://js-mercer.github.io/MNIST-Conditioned-GAN/example-outputs/embeddings_pca_3d.html)
 
-<a href="https://js-mercer.github.io/MNIST-Conditioned-GAN/example-outputs/embeddings_pca_3d.html">
-    <p align="center">
-        <img src="example-outputs/embeddings_pca_3d_preview.png" alt="3D PCA preview" width="300">
-    </p>
-</a>
+<p align="center">
+  <a href="https://js-mercer.github.io/MNIST-Conditioned-GAN/example-outputs/embeddings_pca_3d.html">
+    <img src="example-outputs/embeddings_pca_3d_preview.png" alt="3D PCA preview" width="300">
+  </a>
+</p>
 
 ## Setup (Windows)
 
